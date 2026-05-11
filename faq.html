@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQs - Analyse Sémantique 3D</title>
+  <style>
+    body {
+      margin: 0; padding: 0; background-color: #000011; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #b0b0b0; line-height: 1.6;
+    }
+
+    /* NAVBAR */
+    .main-navbar {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      height: 55px; background-color: #050515; border-bottom: 1px solid #1a1a2a;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 30px; box-sizing: border-box; z-index: 100;
+    }
+    .main-navbar a {
+      color: #fff; text-decoration: none; font-weight: bold;
+      letter-spacing: 1.5px; font-size: 13px; transition: color 0.2s;
+    }
+    .main-navbar a:hover { color: #00ffcc; }
+
+    /* CONTENU */
+    .container { 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 115px 40px 60px 40px; /* 115px = 55px de barre + 60px d'espace d'origine */
+    }
+    h1 { color: #fff; font-size: 32px; font-weight: bold; margin-top: 0; margin-bottom: 50px; text-align: left; }
+    
+    .faq-item { margin-bottom: 40px; }
+    /* Modification : text-transform: none pour autoriser les minuscules */
+    .question { color: #fff; font-size: 19px; font-weight: bold; text-transform: none; letter-spacing: 1px; margin-bottom: 8px; }
+    .answer { font-size: 15px; margin: 0; }
+    
+    a { color: #00ffcc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Style des boutons pro */
+    .btn-pro {
+      display: inline-flex; 
+      align-items: center;
+      padding: 10px 15px; 
+      background: #1a1a24; 
+      color: #00ffcc; 
+      border: 1px solid #3a3a4a; 
+      border-radius: 4px; 
+      font-weight: bold; 
+      text-decoration: none; 
+      font-size: 13px;
+      margin-top: 10px;
+      margin-right: 10px;
+      transition: all 0.2s;
+    }
+    .btn-pro:hover {
+      background: #2a2a3a;
+      border-color: #00ffcc;
+      color: #fff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="main-navbar">
+    <a href="index.html">MakeGraphsGreatAgain</a>
+    <a href="faq.html">FAQ</a>
+  </nav>
+
+  <div class="container">
+    <h1>FAQs</h1>
+
+    <div class="faq-item">
+      <div class="question">Quel est l'objectif ?</div>
+      <p class="answer">L'objectif de ce projet est strictement analytique. Il s'agit de fournir une ressource visuelle pour comprendre comment se structure un discours politique (répétitions, associations d'idées, thématiques centrales). L'approche de Trump en matière de communication est historique et atypique, et la visualiser en 3D permet d'en décortiquer la mécanique de manière objective.</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="question">D'où proviennent les données ?</div>
+      <p class="answer">Les données sont issues des discours et publications de Donald Trump. Les textes bruts ont été traités informatiquement à l'aide d'outils de Natural Language Processing (NLP). Nous avons nettoyé les textes, extrait les concepts clés et analysé la manière dont ces mots sont associés entre eux dans les mêmes phrases.</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="question">Comment avez-vous récupéré ces textes ?</div>
+      <p class="answer">Nous avons utilisé des scripts Python personnalisés pour extraire les données depuis des bases de données publiques et des archives de réseaux sociaux. Voici l'intégralité des sources et sites utilisés :<br>
+      - <strong>Factba.se</strong> (Base de données des discours et déclarations officielles)<br>
+      - <strong>The Trump Twitter Archive</strong> (Archive complète des anciens tweets)<br>
+      - <strong>Twitter / X</strong> (Scraping direct via API)<br>
+      - <strong>Truth Social</strong> (Publications récentes du compte officiel)<br><br>
+      Ces données brutes ont ensuite été unifiées et nettoyées via nos pipelines NLP pour générer les fichiers CSV finaux.</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="question">Le graphe est-il exhaustif?</div>
+      <p class="answer">Non. Si nous affichions tous les mots et toutes leurs connexions, l'interface deviendrait une masse illisible et ferait ralentir votre navigateur. Nous avons appliqué un seuil statistique : seuls les termes les plus fréquents et les connexions les plus significatives sont affichés. C'est un échantillon optimisé pour révéler l'ossature rhétorique du discours.</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="question">Puis-je avoir accès aux données ?</div>
+      <p class="answer">Oui. Les jeux de données CSV (nœuds, arêtes, textes corrigés) sont téléchargeables ci-dessous.</p>
+      <a href="TRUMP_TWEETS.csv" class="btn-pro">⬇ Télécharger le CSV (TRUMP_TWEETS)</a>
+    </div>
+
+    <div class="faq-item">
+      <div class="question">Puis-je utiliser votre code ?</div>
+      <p class="answer">Oui aussi. Le code source entier est open-source. Sentez-vous libre de l'utiliser!</p>
+    <a href="https://github.com/boughbough/MakeGraphsGreatAgain" target="_blank" class="btn-pro">
+        <svg height="16" width="16" viewBox="0 0 16 16" style="fill: #00ffcc; margin-right: 8px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        Code source
+      </a>
+    </div>
+
+    <div class="faq-item">
+      <div class="question">Les données sont-elles fiables?</div>
+      <p class="answer">Oui. L'approche est strictement mathématique et transparente. Les algorithmes NLP ne font que compter et relier ce qui est réellement présent dans les corpus officiels, sans ajout d'opinion. L'intégralité du processus de traitement des données est documentée dans nos scripts de nettoyage, ce qui rend l'étude reproductible et vérifiable par n'importe qui.</p>
+    </div>
+
+
+    <div class="faq-item">
+      <div class="question">Y a-t-il des publicités?</div>
+      <p class="answer">Non, aucune publicité, aucun cookie, rien. C'est un outil de recherche ouvert.</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="question">Qui a créé ce site?</div>
+      <p class="answer">Ce projet a été réalisé par Mohamed Boughmadi et Mohamet Thiam dans le cadre d'un travail de recherche en Data Science et traitement du langage naturel (NLP).</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="question">Comment vous contacter ?</div>
+      <p class="answer">Vous pouvez nous contacter pour toute question relative à l'analyse ou au code via nos profils GitHub respectifs :</p>
+      <a href="https://github.com/boughbough" target="_blank" class="btn-pro">
+        <svg height="16" width="16" viewBox="0 0 16 16" style="fill: #00ffcc; margin-right: 8px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        Mohamed Boughmadi
+      </a>
+      <a href="https://github.com/mht-thiam11" target="_blank" class="btn-pro">
+        <svg height="16" width="16" viewBox="0 0 16 16" style="fill: #00ffcc; margin-right: 8px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        Mohamet Thiam
+      </a>
+    </div>
+
+  </div>
+
+</body>
+</html>
