@@ -1,0 +1,233 @@
+<head>
+  <meta charset="UTF-8">
+  <style> 
+    body { margin: 0; background-color: #000011; overflow: hidden; font-family: sans-serif; } 
+    
+    /* Barre de recherche discrète en haut */
+    #search-container { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(0, 0, 15, 0.8); padding: 8px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    select { padding: 6px 10px; font-size: 13px; border-radius: 4px; border: none; background: #111; color: white; width: 200px; outline: none; cursor: pointer; }
+
+    /* Panneau de statistiques */
+    #info-panel { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(0, 0, 15, 0.9); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); color: white; display: none; min-width: 230px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    #info-panel h2 { margin: 0 0 15px 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px;}
+    .stat-value { font-weight: bold; color: #fff; font-size: 18px;}
+    .color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid #fff;}
+    .neighbor-link { cursor: pointer; text-decoration: underline; color: #00ffcc; transition: color 0.2s; }
+    .neighbor-link:hover { color: #ffcc00; }
+
+    /* 🛑 LE FOOTER MAJESTUEUX */
+    #footer-interface {
+      position: absolute; bottom: 0; left: 0; width: 100%; z-index: 10;
+      background: linear-gradient(to top, rgba(0,0,10,0.95), rgba(0,0,10,0.8) 70%, transparent);
+      padding: 20px 40px 40px 40px; box-sizing: border-box;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .footer-section { display: flex; flex-direction: column; gap: 10px; }
+    .section-camera { align-items: center; position: absolute; left: 50%; transform: translateX(-50%); }
+
+    .section-label { 
+      color: rgba(255, 255, 255, 0.4); font-size: 10px; 
+      text-transform: uppercase; letter-spacing: 3px; font-weight: bold; 
+    }
+
+    .button-group { display: flex; gap: 12px; }
+
+    /* Boutons Ghost */
+    .btn-control { 
+      background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.2); 
+      color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; 
+      cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+    .btn-control:hover { background: rgba(255, 255, 255, 0.1); border-color: white; }
+    .btn-control.active { background: white !important; color: black !important; font-weight: bold; border-color: white; }
+    
+    .btn-icon { width: 50px; height: 50px; padding: 0; border-radius: 50%; font-size: 20px; }
+
+    /* Instructions de navigation en petit en bas */
+    #nav-instructions {
+      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,0.3); font-size: 10px; pointer-events: none;
+    }
+  </style>
+  
+  <script src="//unpkg.com/three@0.147.0/build/three.min.js"></script>
+  <script src="//unpkg.com/three-spritetext@1.8.2/dist/three-spritetext.min.js"></script>
+  <script src="//unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+</head>
+<body>
+  
+  <div id="search-container"><select id="node-search"><option value="">-- Chercher un mot --</option></select></div>
+  
+  <div id="info-panel">
+    <h2 id="info-name">Mot</h2>
+    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-bottom: 10px;">
+      <p>Influence : <span id="info-weight" class="stat-value">0</span></p>
+      <p>Connexions : <span id="info-degree" class="stat-value">0</span> mots</p>
+      <p>Thème : <span class="color-dot" id="info-color"></span><span id="info-cluster" style="color: #fff; font-weight: bold;">-</span></p>
+    </div>
+    <div style="background: rgba(0, 255, 204, 0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(0, 255, 204, 0.1);">
+      <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #00ffcc; margin-bottom: 8px; font-weight: bold;">Top Associés (Fréquence)</p>
+      <div id="info-neighbors" style="font-size: 13px; color: #fff; line-height: 1.6; font-family: monospace;">-</div>
+    </div>
+  </div>
+
+  <footer id="footer-interface">
+    <div class="footer-section">
+      <div class="section-label">Thématiques</div>
+      <div class="button-group" id="cluster-filters"></div>
+    </div>
+
+    <div class="footer-section section-camera">
+      <div class="section-label">Caméra</div>
+      <div class="button-group">
+        <button class="btn-control btn-icon" id="btn-reset" title="Réinitialiser">⟲</button>
+        <button class="btn-control btn-icon" id="btn-rotate" title="Pause/Play">▷|</button>
+        <button class="btn-control btn-icon" id="btn-links" title="Afficher/Cacher Liens">⊘</button>
+      </div>
+    </div>
+  </footer>
+
+  <div id="nav-instructions">Clic-gauche : rotation | Roulette : zoom | Clic-droit : panoramique</div>
+
+  <div id="3d-graph"></div>
+
+  <script>
+    const groupNames = { 0: "Opposition - Médias", 1: "Sécurité - Institutions", 2: "Identité - Slogans" };
+    const palette = ['#000fff', '#ffffff', '#ff1302']; 
+
+    let isRotating = true;
+    let linksVisible = true;
+    let activeClusterFilter = null; 
+    const highlightNodes = new Set();
+    const highlightLinks = new Set();
+    let selectedNode = null;
+
+    window.handleNeighborClick = (id) => {
+        const cible = Graph.graphData().nodes.find(n => n.id === id);
+        if (cible) { document.getElementById('node-search').value = id; activerFocusEtStats(cible); }
+    };
+
+    function updateHighlight() {
+      Graph.nodeVisibility(Graph.nodeVisibility()).nodeColor(Graph.nodeColor()).linkWidth(Graph.linkWidth()).linkOpacity(Graph.linkOpacity()).linkVisibility(Graph.linkVisibility()).nodeThreeObject(Graph.nodeThreeObject());
+    }
+
+    const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
+        .nodeLabel('name') 
+        .nodeVisibility(node => activeClusterFilter === null || node.group == activeClusterFilter)
+        .nodeColor(node => {
+          const baseColor = palette[node.group] || '#cccccc'; 
+          return (highlightNodes.size === 0 || highlightNodes.has(node)) ? baseColor : '#1a1a2e'; 
+        })
+        .nodeVal(node => node.val / 150).nodeResolution(16) 
+        .linkVisibility(link => {
+          if (!linksVisible) return false;
+          if (activeClusterFilter !== null) {
+            const sG = typeof link.source === 'object' ? link.source.group : link.source_group;
+            const tG = typeof link.target === 'object' ? link.target.group : link.target_group;
+            if (sG != activeClusterFilter || tG != activeClusterFilter) return false;
+          }
+          return highlightNodes.size > 0 ? highlightLinks.has(link) : true;
+        })
+        .linkWidth(link => (highlightLinks.has(link) ? Math.min(Math.sqrt(link.value) / 10, 2) : 0.1))
+        .linkOpacity(link => (highlightLinks.has(link) ? 0.6 : 0.015))
+        .backgroundColor('#050515')
+        .nodeThreeObjectExtend(true) 
+        .nodeThreeObject(node => {
+          if (highlightNodes.size > 0 && !highlightNodes.has(node)) return null;
+          const seuil = highlightNodes.size > 0 ? 0 : 3500; 
+          if (node.val > seuil || highlightNodes.has(node)) { 
+            const sprite = new SpriteText(node.name);
+            sprite.color = (node === selectedNode) ? '#ffcc00' : 'white'; 
+            sprite.fontWeight = 'bold'; sprite.strokeWidth = 1.5; sprite.strokeColor = 'black';
+            sprite.textHeight = (node === selectedNode) ? 14 : 6 + (Math.sqrt(node.val) / 15); 
+            sprite.position.y = (Math.cbrt(node.val / 150) * 4) + (sprite.textHeight / 2) + 2; 
+            return sprite;
+          }
+          return null; 
+        })
+        .onNodeClick(node => { activerFocusEtStats(node); document.getElementById('node-search').value = node.id; });
+
+    Graph.d3Force('link').distance(200); 
+    Graph.d3Force('charge').strength(-800); 
+    Graph.cameraPosition({ x: 0, y: 0, z: 1500 });
+
+    setInterval(() => {
+      if (isRotating) {
+        const camPos = Graph.cameraPosition();
+        const angle = Math.atan2(camPos.x, camPos.z) + 0.0015;
+        const radius = Math.sqrt(camPos.x * camPos.x + camPos.z * camPos.z);
+        Graph.cameraPosition({ x: radius * Math.sin(angle), z: radius * Math.cos(angle), y: camPos.y });
+      }
+    }, 20);
+
+    function activerFocusEtStats(cible) {
+      if (!cible) return;
+      const neighbors = Graph.graphData().links.filter(l => l.source.id === cible.id || l.target.id === cible.id).map(l => {
+          const n = l.source.id === cible.id ? l.target : l.source;
+          return { id: n.id, name: n.name, val: l.value };
+      }).sort((a, b) => b.val - a.val);
+
+      document.getElementById('info-panel').style.display = 'block';
+      document.getElementById('info-name').innerText = cible.name;
+      document.getElementById('info-weight').innerText = Math.round(cible.val).toLocaleString(); 
+      document.getElementById('info-degree').innerText = neighbors.length;
+      document.getElementById('info-cluster').innerText = groupNames[cible.group];
+      document.getElementById('info-color').style.backgroundColor = palette[cible.group];
+      
+      const top3 = neighbors.slice(0, 3).map((n, i) => `${i+1}. <span class="neighbor-link" onclick="handleNeighborClick('${n.id}')">${n.name.toUpperCase()}</span> (${Math.round(n.val)})`).join('<br>');
+      document.getElementById('info-neighbors').innerHTML = top3 || "Aucun lien majeur";
+
+      isRotating = false; document.getElementById('btn-rotate').innerHTML = "▷|";
+      selectedNode = cible; highlightNodes.clear(); highlightLinks.clear(); highlightNodes.add(cible);
+      Graph.graphData().links.forEach(l => { if (l.source.id === cible.id || l.target.id === cible.id) { highlightLinks.add(l); highlightNodes.add(l.source.id === cible.id ? l.target : l.source); } });
+      updateHighlight();
+      const dist = 1 + 150 / Math.hypot(cible.x, cible.y, cible.z);
+      Graph.cameraPosition({ x: cible.x * dist, y: cible.y * dist, z: cible.z * dist }, cible, 2000);
+    }
+
+    document.getElementById('btn-reset').onclick = () => {
+      document.getElementById('info-panel').style.display = 'none';
+      document.getElementById('node-search').value = '';
+      activeClusterFilter = null; selectedNode = null; highlightNodes.clear(); highlightLinks.clear();
+      document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+      updateHighlight();
+      Graph.cameraPosition({ x: 0, y: 0, z: 1500 }, { x: 0, y: 0, z: 0 }, 2000);
+      isRotating = true; document.getElementById('btn-rotate').innerHTML = "▷|";
+    };
+
+    document.getElementById('btn-rotate').onclick = (e) => { isRotating = !isRotating; e.target.innerHTML = isRotating ? "▷|" : "▷|"; };
+    document.getElementById('btn-links').onclick = (e) => { linksVisible = !linksVisible; updateHighlight(); e.target.innerHTML = linksVisible ? "⊘" : "⚛"; };
+
+    fetch('trump_3d_data.json').then(res => res.json()).then(data => {
+      data.links.forEach(l => {
+        l.source_group = data.nodes.find(n => n.id === (l.source.id || l.source)).group;
+        l.target_group = data.nodes.find(n => n.id === (l.target.id || l.target)).group;
+      });
+      Graph.graphData(data);
+      data.nodes.sort((a,b) => a.name.localeCompare(b.name)).forEach(n => {
+        const o = document.createElement('option'); o.value = n.id; o.text = n.name;
+        document.getElementById('node-search').appendChild(o);
+      });
+      document.getElementById('node-search').onchange = (e) => {
+        if (e.target.value === "") document.getElementById('btn-reset').click();
+        else activerFocusEtStats(Graph.graphData().nodes.find(n => n.id === e.target.value));
+      };
+
+      const filterBox = document.getElementById('cluster-filters');
+      [0, 1, 2].forEach(id => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-control btn-filter';
+        btn.innerHTML = `<span class="color-dot" style="background-color: ${palette[id]}"></span> ${groupNames[id]}`;
+        btn.onclick = () => {
+          if (activeClusterFilter == id) { activeClusterFilter = null; btn.classList.remove('active'); }
+          else { activeClusterFilter = id; document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+          updateHighlight();
+        };
+        filterBox.appendChild(btn);
+      });
+    });
+  </script>
+</body>
