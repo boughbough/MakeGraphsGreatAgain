@@ -98,16 +98,16 @@ Les graphes sont générés en amont via un pipeline Python NLP :
 
 ```
 Tweets et discours bruts (.csv)
-        ↓
+            ↓
   Nettoyage & Tokenisation
-        ↓
-  Calcul des co-occurrences
-        ↓
-  Clustering (Louvain / k-means)
-        ↓
-  Export JSON (nodes + links)
-        ↓
-  Visualisation 3D (3d-force-graph)
+              ↓
+    Calcul des co-occurrences
+                ↓
+      Clustering (Louvain / k-means)
+                  ↓
+        Export JSON (nodes + links)
+                    ↓
+          Visualisation 3D (3d-force-graph)
 ```
 
 Chaque nœud JSON contient :
