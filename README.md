@@ -59,7 +59,7 @@
 - **Filtres Thématiques** : Isolez les clusters sémantiques (Slogans, Nation, Politique, Sécurité...) par président.
 
 ### 🤖 Générateur de Tweets
-- **Génération NLP** : Créez des tweets dans le style de chaque président à partir de l'analyse lexicale des corpus.
+- **Génération IA (Mistral API) :** : Créez des tweets dans le style de chaque président à partir de l'analyse lexicale des corpus.
 
 ### 🎨 Interface & UX
 - **Design Spatial** : Interface sombre et immersive pensée pour la visualisation de données.
@@ -97,7 +97,7 @@
 Les graphes sont générés en amont via un pipeline Python NLP :
 
 ```
-Discours bruts (.txt)
+Tweets et discours bruts (.csv)
         ↓
   Nettoyage & Tokenisation
         ↓
