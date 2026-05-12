@@ -1,0 +1,15 @@
+# --- Sécurité ---
+config.js
+
+# --- Environnement local ---
+venv/
+.env
+__pycache__/
+*.pyc
+
+# --- Dossiers de travail locaux ---
+lib/
+data/
+
+# --- Divers ---
+.DS_Store

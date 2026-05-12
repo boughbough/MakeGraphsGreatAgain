@@ -1,243 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
 <head>
+  <meta name="description" content="MakeGraphsGreatAgain : Visualisation 3D et analyse NLP des discours de Donald Trump, Joe Biden et Barack Obama.">
+  <meta property="og:title" content="MGGA - Analyse NLP 3D">
+  <meta property="og:image" content="logo.png">
   <meta charset="UTF-8">
-  <style> 
-    body { margin: 0; background-color: #000011; overflow: hidden; font-family: sans-serif; } 
-    
-    /* Barre de recherche discrète en haut */
-    #search-container { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(0, 0, 15, 0.8); padding: 8px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); }
-    select { padding: 6px 10px; font-size: 13px; border-radius: 4px; border: none; background: #111; color: white; width: 200px; outline: none; cursor: pointer; }
+  <title>MGGA - Home</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    body { margin: 0; background-color: #000011; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-    /* Panneau de statistiques */
-    #info-panel { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(0, 0, 15, 0.9); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); color: white; display: none; min-width: 230px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-    #info-panel h2 { margin: 0 0 15px 0; font-size: 22px; text-transform: uppercase; letter-spacing: 1px;}
-    .stat-value { font-weight: bold; color: #fff; font-size: 18px;}
-    .color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid #fff;}
-    .neighbor-link { cursor: pointer; text-decoration: underline; color: #00ffcc; transition: color 0.2s; }
-    .neighbor-link:hover { color: #ffcc00; }
+    .main-navbar {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 55px;
+      background-color: #050515; border-bottom: 1px solid #1a1a2a;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 30px; box-sizing: border-box; z-index: 100;
+    }
+    .main-navbar a {
+      color: #fff; text-decoration: none; font-weight: bold;
+      letter-spacing: 1.5px; font-size: 13px; transition: color 0.2s;
+    }
+    .main-navbar a:hover { color: #ffffff; }
+    a:hover { text-decoration: underline; }
 
-    /* 🛑 LE FOOTER MAJESTUEUX */
+    .graph-selector {
+      background: #0d0d1a; color: #ffffff; border: 1px solid #1a1a2a;
+      padding: 5px 10px; border-radius: 4px; font-family: 'Segoe UI', sans-serif;
+      font-size: 12px; font-weight: bold; cursor: pointer; outline: none;
+      transition: all 0.2s; margin-left: 20px;
+    }
+    .graph-selector:hover { border-color: #ffffff; box-shadow: 0 0 8px rgba(0,255,204,0.3); }
+
+    #search-container { position: absolute; top: 75px; left: 20px; z-index: 20; width: 250px; }
+    #search-input {
+      width: 100%; box-sizing: border-box; padding: 10px 36px 10px 15px; font-size: 13px;
+      border-radius: 4px; border: 1px solid #2a2a3a; background: #0d0d1a; color: #ddd;
+      outline: none; transition: border-color 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    #search-input:focus { border-color: #ffffff; }
+    #search-results {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; width: 100%;
+      max-height: 250px; overflow-y: auto; background: #0d0d1a; border: 1px solid #2a2a3a;
+      border-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); z-index: 21;
+    }
+    .search-item { padding: 10px 15px; font-size: 13px; color: #ccc; cursor: pointer; border-bottom: 1px solid #1a1a24; transition: background 0.2s; }
+    .search-item:hover { background: #1a1a24; color: #ffffff; }
+
+    #info-panel { position: absolute; top: 75px; right: 20px; z-index: 10; background: #0d0d1a; padding: 20px; border-radius: 4px; border: 1px solid #2a2a3a; color: #e0e0e0; display: none; min-width: 240px; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+    #info-panel h2 { margin: 0 0 15px 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
+    .stat-value { font-weight: bold; color: #fff; font-size: 16px; font-family: monospace; }
+    .color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; border: 1px solid #fff; vertical-align: middle; }
+    .neighbor-link { cursor: pointer; text-decoration: underline; color: #ffffff; transition: color 0.2s; }
+
+    #cluster-words-panel {
+      position: absolute; top: 130px; left: 20px; z-index: 20; width: 250px;
+      max-height: 400px; background: #0d0d1a; border: 1px solid #2a2a3a;
+      border-radius: 4px; padding: 15px; color: #e0e0e0; display: none;
+      flex-direction: column; box-shadow: 0 4px 15px rgba(0,0,0,0.8); overflow-x: hidden;
+    }
+    .word-grid { display: flex; flex-wrap: wrap; gap: 8px; overflow-y: auto; margin-top: 10px; overflow-x: hidden; }
+    .word-tag { background: #1a1a24; border: 1px solid #333; padding: 4px 8px; border-radius: 3px; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+    .word-tag:hover { border-color: #ffffff; color: #fff; }
+
+    .cluster-select {
+      background: #1a1a24; color: #ffffff; border: 1px solid #3a3a4a;
+      padding: 8px 12px; border-radius: 4px; font-size: 13px; outline: none; cursor: pointer;
+      width: 220px;
+    }
+
     #footer-interface {
-      position: absolute; bottom: 0; left: 0; width: 100%; z-index: 10;
-      background: linear-gradient(to top, rgba(0,0,10,0.95), rgba(0,0,10,0.8) 70%, transparent);
-      padding: 20px 40px 40px 40px; box-sizing: border-box;
-      display: flex; justify-content: space-between; align-items: flex-end;
-      border-top: 1px solid rgba(255,255,255,0.05);
+      position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 10;
+      background: #0d0d1a; box-sizing: border-box; padding: 0 30px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid #2a2a3a; box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+    }
+    .footer-section { display: flex; flex-direction: column; gap: 8px; }
+    .section-camera { position: absolute; left: 50%; transform: translateX(-50%); align-items: center; }
+    .section-label { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
+    .button-group { display: flex; gap: 8px; }
+    .btn-control { background: #1a1a24; border: 1px solid #3a3a4a; color: #ccc; padding: 8px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.2s ease; }
+    .btn-control:hover { background: #2a2a3a; border-color: #5a5a6a; color: #fff; }
+    .btn-icon { width: 38px; height: 38px; padding: 0; font-size: 16px; font-family: monospace; }
+    .footer-copyright { text-align: right; color: #666; font-size: 11px; line-height: 1.5; }
+    #nav-instructions { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.4); font-size: 11px; font-family: monospace; pointer-events: none; }
+
+    .btn-ghost-reset {
+      background: transparent; border: none; color: #444; cursor: pointer;
+      font-size: 14px; padding: 0 5px; transition: color 0.2s; vertical-align: middle;
+    }
+    .btn-ghost-reset:hover { color: #ffffff; }
+    .flex-row { display: flex; align-items: center; gap: 5px; }
+
+    .top-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer; transition: all 0.2s ease; background: transparent;
+    }
+    .top-item:hover { background: rgba(255,255,255,0.03); padding-left: 8px; }
+    .top-item:last-child { border-bottom: none; }
+
+    .top-rank { font-family: monospace; font-weight: bold; font-size: 11px; margin-right: 12px; opacity: 0.4; }
+    .top-name { flex-grow: 1; font-weight: 600; font-size: 13px; letter-spacing: 0.5px; }
+    .top-val { font-family: monospace; font-size: 11px; color: #aaa; background: rgba(255,255,255,0.05); padding: 3px 6px; border-radius: 4px; }
+
+    #btn-search-reset { display: none; }
+
+    #toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: #1a1a2e; border: 1px solid #ff4444; color: #ff9999;
+      padding: 10px 20px; border-radius: 4px; font-size: 13px; font-family: monospace;
+      z-index: 200; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+    #toast.visible { opacity: 1; }
+
+    @media (max-width: 1100px) {
+      #search-container, #cluster-words-panel, #info-panel {
+        transform: scale(0.85); transform-origin: top left;
+      }
+      #info-panel { transform-origin: top right; }
     }
 
-    .footer-section { display: flex; flex-direction: column; gap: 10px; }
-    .section-camera { align-items: center; position: absolute; left: 50%; transform: translateX(-50%); }
-
-    .section-label { 
-      color: rgba(255, 255, 255, 0.4); font-size: 10px; 
-      text-transform: uppercase; letter-spacing: 3px; font-weight: bold; 
-    }
-
-    .button-group { display: flex; gap: 12px; }
-
-    /* Boutons Ghost */
-    .btn-control { 
-      background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.2); 
-      color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; 
-      cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(5px);
-    }
-    .btn-control:hover { background: rgba(255, 255, 255, 0.1); border-color: white; }
-    .btn-control.active { background: white !important; color: black !important; font-weight: bold; border-color: white; }
-    
-    .btn-icon { width: 50px; height: 50px; padding: 0; border-radius: 50%; font-size: 20px; }
-
-    /* Instructions de navigation en petit en bas */
-    #nav-instructions {
-      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-      color: rgba(255,255,255,0.3); font-size: 10px; pointer-events: none;
-    }
-
-    .copyright {
-      position: absolute;
-      bottom: 10px;
-      right: 40px; /* Aligné à droite pour équilibrer avec les instructions au centre */
-      color: rgba(255, 255, 255, 0.2);
-      font-size: 10px;
-      letter-spacing: 1px;
-    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00ffcc; }
   </style>
-  
-  <script src="//unpkg.com/three@0.147.0/build/three.min.js"></script>
-  <script src="//unpkg.com/three-spritetext@1.8.2/dist/three-spritetext.min.js"></script>
-  <script src="//unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three-spritetext@1.9.1/dist/three-spritetext.min.js"></script>
+  <script src="https://unpkg.com/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script>
 </head>
 <body>
-  
-  <div id="search-container"><select id="node-search"><option value="">-- Chercher un mot --</option></select></div>
-  
+
+  <nav class="main-navbar">
+    <div style="display: flex; align-items: center;">
+      <a href="index.html">MakeGraphsGreatAgain</a>
+      <select id="corpus-selector" class="graph-selector">
+        <option value="data/json/trump_3d_data.json">Donald Trump</option>
+        <option value="data/json/biden_3d_data.json">Joe Biden</option>
+        <option value="data/json/obama_3d_data.json">Barack Obama</option>
+      </select>
+    </div>
+    <div style="display: flex; gap: 20px;">
+      <a href="generator.html">Tweet Generator</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+  </nav>
+
+  <div id="search-container">
+    <div style="position: relative;">
+      <input type="text" id="search-input" placeholder="Rechercher un mot..." autocomplete="off">
+      <button class="btn-ghost-reset" id="btn-search-reset" onclick="resetSearch()" title="Effacer la recherche" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%);">✕</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+  <div id="cluster-words-panel">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span id="cluster-title" style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #888; font-weight: bold;">Mots du Thème</span>
+    </div>
+    <div id="cluster-words-list" class="word-grid"></div>
+  </div>
+
   <div id="info-panel">
     <h2 id="info-name">Mot</h2>
-    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-bottom: 10px;">
-      <p>Influence : <span id="info-weight" class="stat-value">0</span></p>
-      <p>Connexions : <span id="info-degree" class="stat-value">0</span> mots</p>
-      <p>Thème : <span class="color-dot" id="info-color"></span><span id="info-cluster" style="color: #fff; font-weight: bold;">-</span></p>
+    <div style="border-top: 1px solid #2a2a3a; padding-top: 12px; margin-bottom: 12px;">
+      <p style="margin: 5px 0; font-size: 13px;">Influence : <span id="info-weight" class="stat-value">0</span></p>
+      <p style="margin: 5px 0; font-size: 13px;">Connexions : <span id="info-degree" class="stat-value">0</span> mots</p>
+      <p style="margin: 5px 0; font-size: 13px;">Thème : <span class="color-dot" id="info-color"></span><span id="info-cluster" style="color: #fff; font-weight: bold;">-</span></p>
     </div>
-    <div style="background: rgba(0, 255, 204, 0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(0, 255, 204, 0.1);">
-      <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #00ffcc; margin-bottom: 8px; font-weight: bold;">Top Associés (Fréquence)</p>
-      <div id="info-neighbors" style="font-size: 13px; color: #fff; line-height: 1.6; font-family: monospace;">-</div>
+    <div style="background: #11111a; padding: 12px; border-radius: 4px; border: 1px solid #222;">
+      <p style="font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #888; margin: 0 0 8px 0; font-weight: bold;">Top Associés</p>
+      <div id="info-neighbors" style="font-size: 12px; color: #ccc; line-height: 1.6; font-family: monospace;">-</div>
+    </div>
+    <div style="margin-top: 12px; border-top: 1px dashed #2a2a3a; padding-top: 12px;">
+      <div class="flex-row">
+        <select id="path-target" style="flex-grow: 1; border-color: #333; background: #05050a; color: #ffffff; padding: 4px; border-radius: 2px; outline: none;">
+          <option value="">-- Chemin vers... --</option>
+        </select>
+        <button class="btn-ghost-reset" onclick="resetPath()" title="Effacer le chemin">✕</button>
+      </div>
+    </div>
+    <div id="path-details" style="margin-top: 12px; background: #051a05; padding: 10px; border: 1px solid #00ff00; border-radius: 4px; display: none;">
+      <p style="font-size: 10px; text-transform: uppercase; color: #00ff00; margin: 0 0 5px 0; font-weight: bold;">Trajet parcouru</p>
+      <div id="path-chain-text" style="font-size: 11px; color: #fff; font-family: monospace; line-height: 1.4;"></div>
     </div>
   </div>
 
   <footer id="footer-interface">
     <div class="footer-section">
       <div class="section-label">Thématiques</div>
-      <div class="button-group" id="cluster-filters"></div>
+      <div class="flex-row">
+        <select id="cluster-select-menu" class="cluster-select">
+          <option value="null">-- Toutes les thématiques --</option>
+        </select>
+        <button class="btn-ghost-reset" onclick="resetClusterFilter()" title="Réinitialiser les thèmes">✕</button>
+      </div>
     </div>
-
     <div class="footer-section section-camera">
       <div class="section-label">Caméra</div>
       <div class="button-group">
         <button class="btn-control btn-icon" id="btn-reset" title="Réinitialiser">⟲</button>
-        <button class="btn-control btn-icon" id="btn-rotate" title="Pause/Play">▷|</button>
-        <button class="btn-control btn-icon" id="btn-links" title="Afficher/Cacher Liens">⊘</button>
+        <button class="btn-control btn-icon" id="btn-rotate" title="Pause/Play">⏸</button>
+        <button class="btn-control btn-icon" id="btn-links" title="Liens">⊘</button>
       </div>
     </div>
-    <div class="copyright">© 2026 MakeGraphsGreatAgain par Mohamed Boughmadi - Mohamet Thiam | Tous droits réservés</div>
+    <div class="footer-copyright">Copyright © 2026 MGGA<br>Mohamed Boughmadi - Mohamet Thiam</div>
   </footer>
 
   <div id="nav-instructions">Clic-gauche : rotation | Roulette : zoom | Clic-droit : panoramique</div>
-
+  <div id="toast"></div>
   <div id="3d-graph"></div>
 
   <script>
-    const groupNames = { 0: "Opposition - Médias", 1: "Sécurité - Institutions", 2: "Identité - Slogans" };
-    const palette = ['#000fff', '#ffffff', '#ff1302']; 
-
-    let isRotating = true;
-    let linksVisible = true;
-    let activeClusterFilter = null; 
-    const highlightNodes = new Set();
-    const highlightLinks = new Set();
-    let selectedNode = null;
-
-    window.handleNeighborClick = (id) => {
-        const cible = Graph.graphData().nodes.find(n => n.id === id);
-        if (cible) { document.getElementById('node-search').value = id; activerFocusEtStats(cible); }
+    const palette = {
+      0: '#CCFF00',
+      1: '#FF0099',
+      2: '#00FF99',
+      3: '#00E5FF',
+      99: '#FF3300'
     };
 
-    function updateHighlight() {
-      Graph.nodeVisibility(Graph.nodeVisibility()).nodeColor(Graph.nodeColor()).linkWidth(Graph.linkWidth()).linkOpacity(Graph.linkOpacity()).linkVisibility(Graph.linkVisibility()).nodeThreeObject(Graph.nodeThreeObject());
+    const allConfigs = {
+      'data/json/trump_3d_data.json': { 0: "SLOGANS", 1: "NATION", 2: "POLITIQUE", 3: "SÉCURITÉ", 99: "DIVERS" },
+      'data/json/biden_3d_data.json': { 0: "CAMPAGNE", 1: "ENJEUX", 2: "PRÉSIDENCE", 3: "SOCIAL", 99: "ÉCONOMIE" },
+      'data/json/obama_3d_data.json': { 0: "SOCIAL", 1: "VALEURS", 2: "FONCTION", 3: "CLIMAT", 99: "JUSTICE" }
+    };
+
+    const elWordsPanel    = document.getElementById('cluster-words-panel');
+    const elWordsList     = document.getElementById('cluster-words-list');
+    const elClusterTitle  = document.getElementById('cluster-title');
+    const elInfoPanel     = document.getElementById('info-panel');
+    const elInfoName      = document.getElementById('info-name');
+    const elInfoWeight    = document.getElementById('info-weight');
+    const elInfoDegree    = document.getElementById('info-degree');
+    const elInfoCluster   = document.getElementById('info-cluster');
+    const elInfoColor     = document.getElementById('info-color');
+    const elInfoNeighbors = document.getElementById('info-neighbors');
+    const elPathDetails   = document.getElementById('path-details');
+    const elPathChain     = document.getElementById('path-chain-text');
+    const elPathTarget    = document.getElementById('path-target');
+    const elClusterMenu   = document.getElementById('cluster-select-menu');
+    const elSearchInput   = document.getElementById('search-input');
+    const elSearchResults = document.getElementById('search-results');
+    const elSearchReset   = document.getElementById('btn-search-reset');
+    const elBtnRotate     = document.getElementById('btn-rotate');
+    const elToast         = document.getElementById('toast');
+
+    let currentData         = null;
+    let groupNames          = allConfigs['data/json/trump_3d_data.json'];
+    let cachedMaxVal        = 0;
+    let isRotating          = true;
+    let linksVisible        = true;
+    let activeClusterFilter = null;
+    let isShowingPath       = false;
+    let selectedNode        = null;
+    let toastTimer          = null;
+
+    const highlightNodes = new Set();
+    const highlightLinks = new Set();
+
+    function showToast(msg) {
+      elToast.textContent = msg;
+      elToast.classList.add('visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => elToast.classList.remove('visible'), 3000);
     }
 
-    const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
-        .nodeLabel('name') 
-        .nodeVisibility(node => activeClusterFilter === null || node.group == activeClusterFilter)
-        .nodeColor(node => {
-          const baseColor = palette[node.group] || '#cccccc'; 
-          return (highlightNodes.size === 0 || highlightNodes.has(node)) ? baseColor : '#1a1a2e'; 
-        })
-        .nodeVal(node => node.val / 150).nodeResolution(16) 
-        .linkVisibility(link => {
-          if (!linksVisible) return false;
-          if (activeClusterFilter !== null) {
-            const sG = typeof link.source === 'object' ? link.source.group : link.source_group;
-            const tG = typeof link.target === 'object' ? link.target.group : link.target_group;
-            if (sG != activeClusterFilter || tG != activeClusterFilter) return false;
-          }
-          return highlightNodes.size > 0 ? highlightLinks.has(link) : true;
-        })
-        .linkWidth(link => (highlightLinks.has(link) ? Math.min(Math.sqrt(link.value) / 10, 2) : 0.1))
-        .linkOpacity(link => (highlightLinks.has(link) ? 0.6 : 0.015))
-        .backgroundColor('#050515')
-        .nodeThreeObjectExtend(true) 
-        .nodeThreeObject(node => {
-          if (highlightNodes.size > 0 && !highlightNodes.has(node)) return null;
-          const seuil = highlightNodes.size > 0 ? 0 : 3500; 
-          if (node.val > seuil || highlightNodes.has(node)) { 
-            const sprite = new SpriteText(node.name);
-            sprite.color = (node === selectedNode) ? '#ffcc00' : 'white'; 
-            sprite.fontWeight = 'bold'; sprite.strokeWidth = 1.5; sprite.strokeColor = 'black';
-            sprite.textHeight = (node === selectedNode) ? 14 : 6 + (Math.sqrt(node.val) / 15); 
-            sprite.position.y = (Math.cbrt(node.val / 150) * 4) + (sprite.textHeight / 2) + 2; 
-            return sprite;
-          }
-          return null; 
-        })
-        .onNodeClick(node => { activerFocusEtStats(node); document.getElementById('node-search').value = node.id; });
+    function afficherTop5() {
+      if (!currentData) return;
+      const top5 = [...currentData.nodes].sort((a, b) => b.val - a.val).slice(0, 5);
+      elWordsList.innerHTML = '';
+      elWordsList.style.flexDirection = 'column';
+      top5.forEach((w, index) => {
+        const div = document.createElement('div');
+        div.className = 'top-item';
+        div.innerHTML = `
+          <span class="top-rank">0${index + 1}</span>
+          <span class="top-name" style="color: ${palette[w.group] || '#ffffff'}">${w.id.toUpperCase()}</span>
+          <span class="top-val" title="Poids brut du node">${Math.round(w.val).toLocaleString()}</span>
+        `;
+        div.onclick = () => activerFocusEtStats(w);
+        elWordsList.appendChild(div);
+      });
+      elClusterTitle.innerText = "Les nodes les + lourds (poids)";
+      elClusterTitle.style.color = "#ffffff";
+      elWordsPanel.style.display = 'flex';
+    }
 
-    Graph.d3Force('link').distance(200); 
-    Graph.d3Force('charge').strength(-800); 
-    Graph.cameraPosition({ x: 0, y: 0, z: 1500 });
+    window.resetClusterFilter = () => {
+      elClusterMenu.value = "null";
+      activeClusterFilter = null;
+      afficherTop5();
+      updateHighlight();
+    };
 
-    setInterval(() => {
-      if (isRotating) {
-        const camPos = Graph.cameraPosition();
-        const angle = Math.atan2(camPos.x, camPos.z) + 0.0015;
-        const radius = Math.sqrt(camPos.x * camPos.x + camPos.z * camPos.z);
-        Graph.cameraPosition({ x: radius * Math.sin(angle), z: radius * Math.cos(angle), y: camPos.y });
+    window.resetPath = () => {
+      elPathTarget.value = "";
+      isShowingPath = false;
+      elPathDetails.style.display = 'none';
+      if (selectedNode) {
+        activerFocusEtStats(selectedNode);
+      } else {
+        highlightNodes.clear();
+        highlightLinks.clear();
+        updateHighlight();
       }
-    }, 20);
+    };
+
+    window.resetSearch = () => {
+      elSearchInput.value = '';
+      elSearchResults.style.display = 'none';
+      elSearchReset.style.display = 'none';
+      if (activeClusterFilter === null) afficherTop5();
+      else elWordsPanel.style.display = 'flex';
+      selectedNode = null;
+      highlightNodes.clear();
+      highlightLinks.clear();
+      elInfoPanel.style.display = 'none';
+      updateHighlight();
+    };
+
+    const Graph = ForceGraph3D()(document.getElementById('3d-graph'))
+      .nodeLabel(node => node.id.toUpperCase())
+      .nodeVisibility(node => activeClusterFilter === null || parseInt(node.group) === activeClusterFilter)
+      .nodeColor(node => {
+        const baseColor = palette[node.group] || '#cccccc';
+        return (highlightNodes.size === 0 || highlightNodes.has(node)) ? baseColor : '#1a1a2e';
+      })
+      .nodeVal(node => node.val / 150)
+      .linkVisibility(link => {
+        if (!linksVisible) return false;
+        if (activeClusterFilter !== null) {
+          const sG = typeof link.source === 'object' ? link.source.group : link.source_group;
+          const tG = typeof link.target === 'object' ? link.target.group : link.target_group;
+          if (parseInt(sG) !== activeClusterFilter || parseInt(tG) !== activeClusterFilter) return false;
+        }
+        return highlightNodes.size > 0 ? highlightLinks.has(link) : true;
+      })
+      .linkColor(link => {
+        if (highlightLinks.has(link)) return isShowingPath ? '#00ff00' : '#ffffff';
+        return 'rgba(255,255,255,0.2)';
+      })
+      .linkWidth(link => (highlightLinks.has(link) ? 3 : 0.1))
+      .linkOpacity(link => (highlightLinks.has(link) ? 0.8 : 0.015))
+      .backgroundColor('#050515')
+      .nodeThreeObjectExtend(true)
+      .nodeThreeObject(node => {
+        if (highlightNodes.size > 0 && !highlightNodes.has(node)) return null;
+        const seuil = highlightNodes.size > 0 ? 0 : cachedMaxVal * 0.20;
+        if (node.val >= seuil || highlightNodes.has(node)) {
+          const sprite = new SpriteText(node.name || node.id.toUpperCase());
+          sprite.color = (node === selectedNode) ? '#ffcc00' : '#ffffff';
+          sprite.fontWeight = 'bold';
+          sprite.textHeight = (node === selectedNode) ? 15 : 8;
+          sprite.backgroundColor = 'rgba(0,0,10,0.8)';
+          sprite.padding = 3;
+          sprite.borderRadius = 2;
+          sprite.center.set(0.5, -1.5);
+          return sprite;
+        }
+        return null;
+      })
+      .onNodeClick(node => {
+        elSearchInput.value = node.id;
+        elSearchReset.style.display = 'inline';
+        activerFocusEtStats(node);
+      })
+      .onBackgroundClick(() => {
+        elInfoPanel.style.display = 'none';
+        elSearchInput.value = '';
+        elSearchReset.style.display = 'none';
+        isShowingPath = false;
+        elPathDetails.style.display = 'none';
+        selectedNode = null;
+        highlightNodes.clear();
+        highlightLinks.clear();
+        updateHighlight();
+      });
+
+    function trouverEtAfficherChemin(depart, destinationId) {
+      if (!depart || !destinationId) return;
+      const data = Graph.graphData();
+      const fin = data.nodes.find(n => n.id === destinationId);
+      if (!fin || depart.id === fin.id) return;
+
+      const MAX_DEPTH = 10;
+      let queue = [[depart]];
+      let visited = new Set([depart.id]);
+      let foundPath = null;
+
+      setTimeout(() => {
+        while (queue.length > 0) {
+          const path = queue.shift();
+          if (path.length > MAX_DEPTH) continue;
+          const node = path[path.length - 1];
+          if (node.id === fin.id) { foundPath = path; break; }
+          for (const l of data.links) {
+            const sId = l.source.id || l.source;
+            const tId = l.target.id || l.target;
+            const next = sId === node.id ? l.target : (tId === node.id ? l.source : null);
+            if (next && !visited.has(next.id)) {
+              visited.add(next.id);
+              queue.push([...path, next]);
+            }
+          }
+        }
+
+        if (foundPath) {
+          isShowingPath = true;
+          highlightNodes.clear(); highlightLinks.clear();
+          foundPath.forEach(n => highlightNodes.add(n));
+          for (let i = 0; i < foundPath.length - 1; i++) {
+            const link = data.links.find(l => {
+              const sid = l.source.id || l.source;
+              const tid = l.target.id || l.target;
+              return (sid === foundPath[i].id && tid === foundPath[i+1].id) || (sid === foundPath[i+1].id && tid === foundPath[i].id);
+            });
+            if (link) highlightLinks.add(link);
+          }
+          elPathChain.innerText = foundPath.map(n => n.id.toUpperCase()).join(' → ');
+          elPathDetails.style.display = 'block';
+        } else {
+          showToast("Aucun chemin trouvé (profondeur max : 10).");
+          resetPath();
+        }
+        updateHighlight();
+      }, 0);
+    }
 
     function activerFocusEtStats(cible) {
       if (!cible) return;
-      const neighbors = Graph.graphData().links.filter(l => l.source.id === cible.id || l.target.id === cible.id).map(l => {
-          const n = l.source.id === cible.id ? l.target : l.source;
-          return { id: n.id, name: n.name, val: l.value };
+      elInfoPanel.style.display = 'block';
+      elInfoName.innerText = (cible.name || cible.id).toUpperCase();
+      elInfoWeight.innerText = Math.round(cible.val).toLocaleString();
+      elInfoCluster.innerText = groupNames[cible.group] || "Divers";
+      elInfoColor.style.backgroundColor = palette[cible.group] || "#ccc";
+
+      const neighbors = Graph.graphData().links.filter(l => {
+        const sId = l.source.id || l.source;
+        const tId = l.target.id || l.target;
+        return sId === cible.id || tId === cible.id;
+      }).map(l => {
+        const sId = l.source.id || l.source;
+        const n = sId === cible.id ? l.target : l.source;
+        return { id: n.id, name: n.name || n.id, val: l.value };
       }).sort((a, b) => b.val - a.val);
 
-      document.getElementById('info-panel').style.display = 'block';
-      document.getElementById('info-name').innerText = cible.name;
-      document.getElementById('info-weight').innerText = Math.round(cible.val).toLocaleString(); 
-      document.getElementById('info-degree').innerText = neighbors.length;
-      document.getElementById('info-cluster').innerText = groupNames[cible.group];
-      document.getElementById('info-color').style.backgroundColor = palette[cible.group];
-      
-      const top3 = neighbors.slice(0, 3).map((n, i) => `${i+1}. <span class="neighbor-link" onclick="handleNeighborClick('${n.id}')">${n.name.toUpperCase()}</span> (${Math.round(n.val)})`).join('<br>');
-      document.getElementById('info-neighbors').innerHTML = top3 || "Aucun lien majeur";
+      elInfoDegree.innerText = neighbors.length;
+      const top3 = neighbors.slice(0, 3).map((n, i) =>
+        `${i+1}. <span class="neighbor-link" onclick="handleNeighborClick('${n.id}')">${n.name.toUpperCase()}</span>`
+      ).join('<br>');
+      elInfoNeighbors.innerHTML = top3 || "Aucun lien";
 
-      isRotating = false; document.getElementById('btn-rotate').innerHTML = "▷|";
-      selectedNode = cible; highlightNodes.clear(); highlightLinks.clear(); highlightNodes.add(cible);
-      Graph.graphData().links.forEach(l => { if (l.source.id === cible.id || l.target.id === cible.id) { highlightLinks.add(l); highlightNodes.add(l.source.id === cible.id ? l.target : l.source); } });
+      isRotating = false;
+      elBtnRotate.innerHTML = "▶";
+      selectedNode = cible;
+
+      const currentTarget = elPathTarget.value;
+      if (currentTarget && currentTarget !== cible.id) {
+        trouverEtAfficherChemin(cible, currentTarget);
+      } else {
+        isShowingPath = false;
+        elPathDetails.style.display = 'none';
+        highlightNodes.clear(); highlightLinks.clear(); highlightNodes.add(cible);
+        Graph.graphData().links.forEach(l => {
+          const sId = l.source.id || l.source;
+          const tId = l.target.id || l.target;
+          if (sId === cible.id || tId === cible.id) {
+            highlightLinks.add(l);
+            highlightNodes.add(sId === cible.id ? l.target : l.source);
+          }
+        });
+      }
+
       updateHighlight();
-      const dist = 1 + 150 / Math.hypot(cible.x, cible.y, cible.z);
-      Graph.cameraPosition({ x: cible.x * dist, y: cible.y * dist, z: cible.z * dist }, cible, 2000);
+      const zoomTo = (node) => {
+        const x = node.x || 0, y = node.y || 0, z = node.z || 0;
+        const hypot = Math.hypot(x, y, z);
+        if (hypot < 1) { setTimeout(() => zoomTo(node), 200); return; }
+        const ry = Graph.scene().rotation.y;
+        const wx = x * Math.cos(ry) + z * Math.sin(ry);
+        const wy = y;
+        const wz = -x * Math.sin(ry) + z * Math.cos(ry);
+        const dist = 1 + 200 / hypot;
+        Graph.cameraPosition({ x: wx * dist, y: wy * dist, z: wz * dist }, { x: wx, y: wy, z: wz }, 2000);
+      };
+      zoomTo(cible);
     }
 
-    document.getElementById('btn-reset').onclick = () => {
-      document.getElementById('info-panel').style.display = 'none';
-      document.getElementById('node-search').value = '';
-      activeClusterFilter = null; selectedNode = null; highlightNodes.clear(); highlightLinks.clear();
-      document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
-      updateHighlight();
-      Graph.cameraPosition({ x: 0, y: 0, z: 1500 }, { x: 0, y: 0, z: 0 }, 2000);
-      isRotating = true; document.getElementById('btn-rotate').innerHTML = "▷|";
+    window.handleNeighborClick = (id) => {
+      const cible = Graph.graphData().nodes.find(n => n.id === id);
+      if (cible) activerFocusEtStats(cible);
     };
 
-    document.getElementById('btn-rotate').onclick = (e) => { isRotating = !isRotating; e.target.innerHTML = isRotating ? "▷|" : "▷|"; };
-    document.getElementById('btn-links').onclick = (e) => { linksVisible = !linksVisible; updateHighlight(); e.target.innerHTML = linksVisible ? "⊘" : "⚛"; };
+    function updateHighlight() {
+      Graph.nodeColor(Graph.nodeColor()).linkWidth(Graph.linkWidth()).nodeThreeObject(Graph.nodeThreeObject());
+    }
 
-    fetch('trump_3d_data.json').then(res => res.json()).then(data => {
-      data.links.forEach(l => {
-        l.source_group = data.nodes.find(n => n.id === (l.source.id || l.source)).group;
-        l.target_group = data.nodes.find(n => n.id === (l.target.id || l.target)).group;
-      });
-      Graph.graphData(data);
-      data.nodes.sort((a,b) => a.name.localeCompare(b.name)).forEach(n => {
-        const o = document.createElement('option'); o.value = n.id; o.text = n.name;
-        document.getElementById('node-search').appendChild(o);
-      });
-      document.getElementById('node-search').onchange = (e) => {
-        if (e.target.value === "") document.getElementById('btn-reset').click();
-        else activerFocusEtStats(Graph.graphData().nodes.find(n => n.id === e.target.value));
-      };
+    function loadGraphData(jsonFile) {
+      activeClusterFilter = null;
+      isShowingPath = false;
+      selectedNode = null;
+      highlightNodes.clear();
+      highlightLinks.clear();
+      elPathDetails.style.display = 'none';
+      elInfoPanel.style.display = 'none';
+      elClusterMenu.value = "null";
+      groupNames = allConfigs[jsonFile] || allConfigs['data/json/trump_3d_data.json'];
 
-      const filterBox = document.getElementById('cluster-filters');
-      [0, 1, 2].forEach(id => {
-        const btn = document.createElement('button');
-        btn.className = 'btn-control btn-filter';
-        btn.innerHTML = `<span class="color-dot" style="background-color: ${palette[id]}"></span> ${groupNames[id]}`;
-        btn.onclick = () => {
-          if (activeClusterFilter == id) { activeClusterFilter = null; btn.classList.remove('active'); }
-          else { activeClusterFilter = id; document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
-          updateHighlight();
-        };
-        filterBox.appendChild(btn);
-      });
-    });
+      fetch(jsonFile)
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          currentData = data;
+          cachedMaxVal = data.nodes.length > 0 ? Math.max(...data.nodes.map(n => n.val)) : 0;
+          afficherTop5();
+
+          data.links.forEach(l => {
+            const sNode = data.nodes.find(n => n.id === (l.source.id || l.source));
+            const tNode = data.nodes.find(n => n.id === (l.target.id || l.target));
+            l.source_group = sNode ? sNode.group : 0;
+            l.target_group = tNode ? tNode.group : 0;
+          });
+
+          Graph.graphData(data);
+
+          elPathTarget.innerHTML = '<option value="">-- Chemin vers... --</option>';
+          data.nodes.sort((a, b) => a.id.localeCompare(b.id)).forEach(n => {
+            const opt = document.createElement('option');
+            opt.value = n.id; opt.text = n.id.toUpperCase();
+            elPathTarget.appendChild(opt);
+          });
+          elPathTarget.onchange = (e) => {
+            trouverEtAfficherChemin(selectedNode, e.target.value);
+            updateHighlight();
+          };
+
+          elClusterMenu.innerHTML = '<option value="null">-- Toutes les thématiques --</option>';
+          const uniqueGroups = [...new Set(data.nodes.map(n => n.group))].sort((a, b) => a - b);
+          uniqueGroups.forEach(id => {
+            if (groupNames[id]) {
+              const opt = document.createElement('option');
+              opt.value = id; opt.text = groupNames[id];
+              elClusterMenu.appendChild(opt);
+            }
+          });
+          elClusterMenu.onchange = (e) => {
+            const groupId = e.target.value === "null" ? null : parseInt(e.target.value);
+            activeClusterFilter = groupId;
+            elWordsList.style.flexDirection = 'row';
+            isShowingPath = false;
+            elPathDetails.style.display = 'none';
+            if (groupId !== null) {
+              const words = data.nodes.filter(n => n.group === groupId).sort((a, b) => b.val - a.val);
+              elWordsList.innerHTML = '';
+              words.forEach(w => {
+                const span = document.createElement('span');
+                span.className = 'word-tag'; span.innerText = w.id.toUpperCase();
+                span.onclick = () => activerFocusEtStats(w);
+                elWordsList.appendChild(span);
+              });
+              elClusterTitle.innerText = groupNames[groupId];
+              elWordsPanel.style.display = 'flex';
+            } else {
+              afficherTop5();
+            }
+            updateHighlight();
+          };
+        })
+        .catch(err => showToast(`Erreur de chargement : ${err.message}`));
+    }
+
+    document.getElementById('corpus-selector').onchange = (e) => loadGraphData(e.target.value);
+    document.getElementById('btn-links').onclick = () => { linksVisible = !linksVisible; updateHighlight(); };
+
+    elSearchInput.oninput = (e) => {
+      const val = e.target.value.toLowerCase();
+      elSearchResults.innerHTML = '';
+      elSearchReset.style.display = val ? 'inline' : 'none';
+      if (!val) {
+        elSearchResults.style.display = 'none';
+        if (activeClusterFilter === null) afficherTop5();
+        else elWordsPanel.style.display = 'flex';
+        return;
+      }
+      elWordsPanel.style.display = 'none';
+      const matches = Graph.graphData().nodes.filter(n => n.id.toLowerCase().includes(val)).slice(0, 10);
+      if (matches.length > 0) {
+        elSearchResults.style.display = 'block';
+        matches.forEach(n => {
+          const div = document.createElement('div'); div.className = 'search-item'; div.innerText = n.id.toUpperCase();
+          div.onclick = () => { activerFocusEtStats(n); elSearchResults.style.display = 'none'; elWordsPanel.style.display = 'none'; };
+          elSearchResults.appendChild(div);
+        });
+      }
+    };
+
+    const controls = Graph.controls();
+    controls.mouseButtons.LEFT = 0;
+    controls.mouseButtons.RIGHT = -1;
+    controls.enablePan = false;
+
+    function animateRotation() {
+      if (isRotating) Graph.scene().rotation.y -= 0.001;
+      requestAnimationFrame(animateRotation);
+    }
+    animateRotation();
+
+    elBtnRotate.onclick = (e) => {
+      isRotating = !isRotating;
+      e.target.innerHTML = isRotating ? "⏸" : "▶";
+    };
+
+    document.getElementById('btn-reset').onclick = () => {
+      isRotating = true;
+      elBtnRotate.innerHTML = "⏸";
+      Graph.scene().rotation.y = 0;
+      controls.target.set(0, 0, 0);
+      Graph.cameraPosition({ x: 0, y: 0, z: 1500 }, { x: 0, y: 0, z: 0 }, 2000);
+    };
+
+    loadGraphData('data/json/trump_3d_data.json');
   </script>
 </body>
+</html>

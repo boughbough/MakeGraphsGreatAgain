@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>MGGA - Tweet Generator</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <style>
+    body { margin: 0; background-color: #000011; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; }
+    
+    .main-navbar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 55px;
+      background-color: #050515; border-bottom: 1px solid #1a1a2a;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0 30px; box-sizing: border-box; z-index: 100;
+    }
+    .main-navbar a { color: #fff; text-decoration: none; font-weight: bold; letter-spacing: 1.5px; font-size: 13px; transition: color 0.2s; }
+    .main-navbar a:hover { color: #ffffff; }
+
+    a:hover { text-decoration: underline; }
+
+    .container {
+      max-width: 600px; margin: 120px auto 50px auto; padding: 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 30px;
+    }
+
+    h1 { 
+      margin: 0; 
+      font-size: 22px; 
+      text-transform: uppercase; 
+      letter-spacing: 1.5px; 
+      color: #ffffff; 
+      font-weight: bold;
+    }
+    p { color: #888; font-size: 14px; text-align: center; margin-top: -20px; }
+
+    .controls { display: flex; gap: 15px; width: 100%; justify-content: center; }
+    
+    select {
+      background: #1a1a24; color: #ffffff; border: 1px solid #3a3a4a;
+      padding: 12px 20px; border-radius: 6px; font-size: 13px; font-weight: bold;
+      outline: none; cursor: pointer; transition: all 0.2s; width: 200px;
+    }
+
+    button {
+      background: #1a1a24; 
+      color: #ffffff; 
+      border: 1px solid #3a3a4a;
+      padding: 12px 25px; 
+      border-radius: 6px; 
+      font-size: 13px; 
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      outline: none; 
+      cursor: pointer; 
+      transition: all 0.2s ease;
+    }
+    button:hover { 
+      background: #252535; 
+      border-color: #ffffff; 
+      color: #ffffff;
+    }
+
+    .tweet-card {
+      background: #000; border: 1px solid #2f3336; border-radius: 16px;
+      padding: 20px; width: 100%; box-sizing: border-box; display: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+    .tweet-header { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+    .profile-pic {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-weight: bold; font-size: 18px; color: #000;
+    }
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 4px; }
+    .verified-badge { width: 16px; height: 16px; fill: #1d9bf0; }
+    .user-handle { color: #71767b; font-size: 14px; }
+    
+    .tweet-content { font-size: 20px; line-height: 1.4; color: #e7e9ea; word-wrap: break-word; }
+    .highlight { color: #1d9bf0; font-weight: bold; }
+    
+    .tweet-footer {
+      margin-top: 15px; color: #71767b; font-size: 14px; border-top: 1px solid #2f3336;
+      padding-top: 15px; display: flex; gap: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="main-navbar">
+    <div style="display: flex; align-items: center;">
+      <a href="index.html">MakeGraphsGreatAgain</a>
+    </div>
+    <div style="display: flex; gap: 20px;">
+      <a href="generator.html">Tweet Generator</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Générateur de Tweets</h1>
+    <p>Analyse sémantique et génération de discours par IA basée sur vos données de clusters.</p>
+
+    <div class="controls">
+      <select id="pres-select">
+        <option value="trump">Donald Trump</option>
+        <option value="biden">Joe Biden</option>
+        <option value="obama">Barack Obama</option>
+      </select>
+      <button onclick="generateTweet()">Générer</button>
+    </div>
+
+    <div id="tweet-card" class="tweet-card">
+      <div class="tweet-header">
+        <div id="p-pic" class="profile-pic"></div>
+        <div class="user-info">
+          <div class="user-name">
+            <span id="p-name">Nom</span>
+            <svg class="verified-badge" viewBox="0 0 24 24"><g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.46.733 2.73 1.845 3.4-.047.25-.074.75-.074.75 0 2.21 1.71 4 3.918 4 .58 0 1.14-.144 1.636-.402.946 1.16 2.373 1.902 3.978 1.902s3.032-.74 3.978-1.905c.496.258 1.056.402 1.636.402 2.208 0 3.918-1.79 3.918-4 0-.25-.027-.5-.074-.75 1.112-.67 1.845-1.94 1.845-3.4zM10.422 17.5l-3.9-3.9 1.41-1.42 2.49 2.49 6.09-6.09 1.41 1.41-7.5 7.5z"></path></g></svg>
+          </div>
+          <div id="p-handle" class="user-handle">@handle</div>
+        </div>
+      </div>
+      <div id="tweet-text" class="tweet-content">Chargement...</div>
+      <div class="tweet-footer">
+        <span id="tweet-time">Maintenant</span>
+        <span>·</span>
+        <span>MGGA AI Engine</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const profiles = {
+      'trump': { file: 'data/json/trump_3d_data.json', name: 'Donald J. Trump', handle: '@realDonaldTrump', color: '#CCFF00', initials: 'DT' },
+      'biden': { file: 'data/json/biden_3d_data.json', name: 'Joe Biden', handle: '@JoeBiden', color: '#FF0099', initials: 'JB' },
+      'obama': { file: 'data/json/obama_3d_data.json', name: 'Barack Obama', handle: '@BarackObama', color: '#00E5FF', initials: 'BO' }
+    };
+
+    let currentData = null; 
+    let currentPres = '';
+
+    async function loadCorpus(pres) {
+      if (pres === currentPres && currentData !== null) return;
+      const response = await fetch(profiles[pres].file);
+      const data = await response.json();
+      currentData = data; 
+      currentPres = pres;
+      
+      document.getElementById('p-pic').innerText = profiles[pres].initials;
+      document.getElementById('p-pic').style.backgroundColor = profiles[pres].color;
+      document.getElementById('p-name').innerText = profiles[pres].name;
+      document.getElementById('p-handle').innerText = profiles[pres].handle;
+    }
+
+    async function generateTweet() {
+      const pres = document.getElementById('pres-select').value;
+      const textBox = document.getElementById('tweet-text');
+      const card = document.getElementById('tweet-card');
+      
+      card.style.display = 'block';
+      textBox.innerHTML = '<span style="color:#71767b;">L\'IA rédige le message...</span>';
+
+      await loadCorpus(pres); 
+
+      const topNodes = [...currentData.nodes].sort((a, b) => b.val - a.val).slice(0, 50);
+      let seeds = [];
+      for(let i=0; i<5; i++) {
+        seeds.push(topNodes[Math.floor(Math.random() * topNodes.length)].id);
+      }
+
+      const prompt = `Tu es ${profiles[pres].name}. Écris un seul tweet réaliste en anglais. Respecte la temporalité. Parle des temps actuels. Tu DOIS utiliser ces mots : ${seeds.join(', ')}. Pas de guillemets. Pas de commentaires supplémentaires.`;
+
+      try {
+        const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${MY_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "mistral-tiny",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.8
+          })
+        });
+
+        const result = await response.json();
+        let finalTweet = result.choices[0].message.content;
+
+        finalTweet = finalTweet.replace(/\*/g, '').replace(/^"|"$/g, '').trim();
+
+        seeds.forEach(word => {
+            const regex = new RegExp(`\\b${word}\\b`, 'gi');
+            finalTweet = finalTweet.replace(regex, `<span class="highlight">#$&</span>`);
+        });
+
+        textBox.innerHTML = finalTweet;
+        const now = new Date();
+        document.getElementById('tweet-time').innerText = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute:'2-digit' }) + ' · MGGA Engine';
+
+      } catch (error) {
+        textBox.innerHTML = `<span style="color:#ff4444;">Erreur API.</span>`;
+      }
+    }
+  </script>
+</body>
+</html>
