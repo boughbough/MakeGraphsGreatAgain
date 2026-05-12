@@ -72,11 +72,11 @@
 
 | Graphe 3D Principal | Filtres Thématiques |
 | :--- | :--- |
-| ![Graphe 3D](./screens/graph.png) | ![Thématiques](./screens/clusters.png) |
+| ![Graphe 3D](./screens/graph.gif) | ![Thématiques](./screens/clusters.gif) |
 
 | Recherche & Shortest Path | Générateur de Tweets |
 | :--- | :--- |
-| ![Recherche](./screens/search.png) | ![Générateur](./screens/generator.png) |
+| ![Recherche](./screens/search.gif) | ![Générateur](./screens/generator.gif) |
 
 ---
 
