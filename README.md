@@ -59,7 +59,7 @@
 - **Filtres Thématiques** : Isolez les clusters sémantiques (Slogans, Nation, Politique, Sécurité...) par président.
 
 ### 🤖 Générateur de Tweets
-- **Génération NLP** : Créez des tweets dans le style de chaque président à partir de l'analyse lexicale des corpus.
+- **Génération IA (Mistral API) :** : Créez des tweets dans le style de chaque président à partir de l'analyse lexicale des corpus.
 
 ### 🎨 Interface & UX
 - **Design Spatial** : Interface sombre et immersive pensée pour la visualisation de données.
@@ -97,17 +97,17 @@
 Les graphes sont générés en amont via un pipeline Python NLP :
 
 ```
-Discours bruts (.txt)
-        ↓
+Tweets et discours bruts (.csv)
+            ↓
   Nettoyage & Tokenisation
-        ↓
-  Calcul des co-occurrences
-        ↓
-  Clustering (Louvain / k-means)
-        ↓
-  Export JSON (nodes + links)
-        ↓
-  Visualisation 3D (3d-force-graph)
+              ↓
+    Calcul des co-occurrences
+                ↓
+      Clustering (Louvain / k-means)
+                  ↓
+        Export JSON (nodes + links)
+                    ↓
+          Visualisation 3D (3d-force-graph)
 ```
 
 Chaque nœud JSON contient :
@@ -154,7 +154,7 @@ http://localhost:8000
 
 | Mohamed Boughmadi | Mohamet Thiam |
 | :---: | :---: |
-| [![GitHub](https://img.shields.io/badge/GitHub-boughbough-181717?style=for-the-badge&logo=github)](https://github.com/boughbough) | [![GitHub](https://img.shields.io/badge/GitHub-Profil-181717?style=for-the-badge&logo=github)](https://github.com/) |
+| [![GitHub](https://img.shields.io/badge/GitHub-boughbough-181717?style=for-the-badge&logo=github)](https://github.com/boughbough) | [![GitHub](https://img.shields.io/badge/GitHub-mhtthiam11-181717?style=for-the-badge&logo=github)](https://github.com/mht-thiam11) |
 
 </div>
 
@@ -165,7 +165,3 @@ http://localhost:8000
 Ce projet est sous licence MIT. Libre à vous de l'utiliser, le modifier et le distribuer.
 
 ---
-
-<div align="center">
-  <p>⭐ Si le projet vous plaît, n'hésitez pas à laisser une étoile sur <a href="https://github.com/boughbough/MakeGraphsGreatAgain">GitHub</a> !</p>
-</div>
