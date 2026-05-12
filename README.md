@@ -154,7 +154,7 @@ http://localhost:8000
 
 | Mohamed Boughmadi | Mohamet Thiam |
 | :---: | :---: |
-| [![GitHub](https://img.shields.io/badge/GitHub-boughbough-181717?style=for-the-badge&logo=github)](https://github.com/boughbough) | [![GitHub](https://img.shields.io/badge/GitHub-Profil-181717?style=for-the-badge&logo=github)](https://github.com/) |
+| [![GitHub](https://img.shields.io/badge/GitHub-boughbough-181717?style=for-the-badge&logo=github)](https://github.com/boughbough) | [![GitHub](https://img.shields.io/badge/GitHub-Profil-181717?style=for-the-badge&logo=github)](https://github.com/mht-thiam11) |
 
 </div>
 
