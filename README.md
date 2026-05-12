@@ -165,7 +165,3 @@ http://localhost:8000
 Ce projet est sous licence MIT. Libre à vous de l'utiliser, le modifier et le distribuer.
 
 ---
-
-<div align="center">
-  <p>⭐ Si le projet vous plaît, n'hésitez pas à laisser une étoile sur <a href="https://github.com/boughbough/MakeGraphsGreatAgain">GitHub</a> !</p>
-</div>
