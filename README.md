@@ -1,6 +1,7 @@
 <div align="center">
 
-  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Bar%20Chart.png" alt="Chart" width="70" />
+  <img width="80" alt="logo" src="https://github.com/user-attachments/assets/ed31eae5-6df0-43b4-8a58-6c5f6f9a5016" />
+
   <h1>M A K E G R A P H S G R E A T A G A I N</h1>
 
   <p><b>La politique américaine, visualisée en 3D.
